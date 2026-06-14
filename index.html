@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>LEVEL 28 · John Wick Edition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,600;14..32,700&family=Playfair+Display:wght@500;700;900&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+
+    <style>
+        /* ===== RESET & BASE ===== */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #080808;
+            color: #f0ede8;
+            line-height: 1.6;
+            overflow-x: hidden;
+            width: 100%;
+            height: 100%;
+        }
+        .invitation-wrapper {
+            width: 100%;
+            min-height: 100vh;
+            position: relative;
+            background: #080808;
+        }
+
+        /* ===== VARIABLES ===== */
+        :root {
+            --gold: #d4af37;
+            --gold-dark: #a07c1a;
+            --red: #b30000;
+            --black: #080808;
+            --black-light: #161616;
+            --text-light: #f0ede8;
+        }
+
+        /* ===== SCREEN 1: INTRO / DECISIÓN ===== */
+        #intro-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--black);
+            z-index: 1000;
+            transition: opacity 0.8s ease, transform 0.8s ease;
+            padding: 2rem;
+            text-align: center;
+        }
+        #intro-screen.hidden {
+            opacity: 0;
+            transform: scale(1.1);
+            pointer-events: none;
+        }
+
+        .intro-bg-image {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.50;
+            filter: brightness(1.45) contrast(1.03);
+            z-index: -1;
+        }
+
+        .intro-content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+        }
+
+        .intro-title {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 8vw, 5rem);
+            color: var(--gold);
+            text-shadow: 0 0 40px rgba(212, 175, 55, 0.3);
+            margin-bottom: 1rem;
+            letter-spacing: 2px;
+        }
+
+        .intro-question {
+            font-size: clamp(1.2rem, 3vw, 1.8rem);
+            color: var(--text-light);
+            margin-bottom: 2.5rem;
+            font-weight: 300;
+        }
+
+        .intro-buttons {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-decision {
+            padding: 1.2rem 2.8rem;
+            font-size: 1.2rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            border: 2px solid;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            font-family: 'Inter', sans-serif;
+        }
+        .btn-yes {
+            background: var(--red);
+            border-color: var(--red);
+            color: #fff;
+            box-shadow: 0 0 30px rgba(179, 0, 0, 0.3);
+        }
+        .btn-yes:hover {
+            transform: scale(1.08);
+            box-shadow: 0 0 60px rgba(179, 0, 0, 0.5);
+            background: #cc0000;
+        }
+
+        .btn-no {
+            background: transparent;
+            border-color: #444;
+            color: #888;
+        }
+        .btn-no:hover {
+            border-color: var(--gold);
+            color: var(--gold);
+            transform: scale(1.05);
+        }
+
+        /* ===== SCREEN 2: MUERTE (NO) ===== */
+        #death-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            flex-direction: column;
+            text-align: center;
+            padding: 2rem;
+        }
+        #death-screen.active {
+            display: flex;
+        }
+        .death-gif {
+            max-width: 90%;
+            max-height: 70vh;
+            border: 2px solid var(--red);
+            box-shadow: 0 0 60px rgba(179, 0, 0, 0.5);
+            margin-bottom: 2rem;
+        }
+        .death-text {
+            font-size: 2rem;
+            color: var(--red);
+            font-family: 'Playfair Display', serif;
+            text-shadow: 0 0 20px rgba(179, 0, 0, 0.6);
+        }
+
+        /* ===== SCREEN 3: INVITACIÓN (SÍ) ===== */
+        #invitation-content {
+            display: none;
+            opacity: 0.45;
+            transition: opacity 1.5s ease;
+            width: 100%;
+        }
+        #invitation-content.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* ===== HERO SECCIÓN (con GIF de la ducha) ===== */
+        .hero-john {
+            position: relative;
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--black);
+            overflow: hidden;
+            border-bottom: 3px solid var(--gold-dark);
+        }
+        .hero-john video, .hero-john img.gif-bg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+            opacity: 0.80;
+        }
+        .hero-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 2;
+        }
+        .hero-content {
+            position: relative;
+            z-index: 3;
+            text-align: center;
+            padding: 2rem;
+            max-width: 900px;
+            width: 100%;
+        }
+        .hero-badge {
+            font-family: 'Inter', sans-serif;
+            letter-spacing: 6px;
+            font-weight: 300;
+            font-size: 0.9rem;
+            color: var(--gold);
+            border: 1px solid var(--gold);
+            padding: 0.5rem 2rem;
+            margin-bottom: 2rem;
+            text-transform: uppercase;
+            backdrop-filter: blur(6px);
+            background: rgba(8, 8, 8, 0.5);
+            display: inline-block;
+        }
+        .hero-content h1 {
+            font-size: clamp(4rem, 14vw, 8rem);
+            font-weight: 900;
+            color: var(--gold);
+            text-shadow: 0 0 40px rgba(212, 175, 55, 0.4);
+            margin: 0.2rem 0;
+            letter-spacing: 4px;
+            line-height: 1;
+        }
+        .hero-content .subtitle {
+            font-size: clamp(1.8rem, 5vw, 2.8rem);
+            font-weight: 500;
+            color: var(--text-light);
+            margin-top: 0.5rem;
+            border-bottom: 2px solid var(--gold-dark);
+            display: inline-block;
+            padding-bottom: 0.4rem;
+            letter-spacing: 2px;
+        }
+        .hero-content .name {
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            font-weight: 400;
+            color: var(--text-light);
+            margin-top: 1.5rem;
+            font-style: italic;
+            letter-spacing: 1px;
+        }
+
+        /* ===== SECCIÓN DETALLES ===== */
+        .details-section {
+            padding: 4rem 2rem;
+            background: var(--black-light);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            border-bottom: 1px solid #2a2a2a;
+        }
+        .detail-card {
+            background: var(--black);
+            border: 1px solid #333;
+            padding: 2rem 1.5rem;
+            flex: 1 1 200px;
+            min-width: 160px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+            transition: all 0.4s ease;
+        }
+        .detail-card:hover {
+            transform: translateY(-8px);
+            border-color: var(--gold);
+            box-shadow: 0 15px 40px rgba(212, 175, 55, 0.1);
+        }
+        .detail-icon { font-size: 2.5rem; margin-bottom: 0.8rem; display: block; }
+        .detail-card h3 { color: var(--gold); font-size: 1.2rem; margin-bottom: 0.5rem; }
+        .detail-card p { color: var(--text-light); font-weight: 300; }
+        .detail-card .sub { color: var(--gold-dark); font-size: 0.8rem; margin-top: 0.3rem; }
+
+        /* ===== NUEVA SECCIÓN: CÓDIGO CONTINENTAL (Mi gusto) ===== */
+        .code-section {
+            padding: 4rem 2rem;
+            background: var(--black);
+            border-bottom: 1px solid #2a2a2a;
+            text-align: center;
+        }
+        .code-box {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2.5rem;
+            border: 1px solid var(--gold-dark);
+            background: var(--black-light);
+            position: relative;
+        }
+        .code-box::before {
+            content: '☠';
+            font-size: 3rem;
+            color: var(--gold-dark);
+            display: block;
+            margin-bottom: 1rem;
+        }
+        .code-box h3 {
+            font-family: 'Playfair Display', serif;
+            color: var(--gold);
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+        }
+        .code-box ul {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+            display: inline-block;
+        }
+        .code-box ul li {
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #2a2a2a;
+            color: var(--text-light);
+            font-weight: 300;
+        }
+        .code-box ul li:last-child {
+            border-bottom: none;
+        }
+        .code-box ul li i {
+            color: var(--gold-dark);
+            margin-right: 1rem;
+        }
+        .code-box .quote {
+            margin-top: 2rem;
+            font-style: italic;
+            color: var(--gold-dark);
+            font-size: 1.1rem;
+        }
+
+        /* ===== NUEVA SECCIÓN: REGALOS (Tu idea) ===== */
+        .gift-section {
+            padding: 4rem 2rem;
+            background: var(--black-light);
+            border-bottom: 1px solid #2a2a2a;
+            text-align: center;
+        }
+        .gift-container {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+        }
+        .gift-container img {
+            max-width: 100%;
+            height: auto;
+            border: 2px solid var(--gold-dark);
+            box-shadow: 0 0 40px rgba(212, 175, 55, 0.15);
+            border-radius: 4px;
+        }
+        .gift-message {
+            background: var(--black);
+            padding: 2rem;
+            border-left: 5px solid var(--gold);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .gift-message h3 {
+            font-family: 'Playfair Display', serif;
+            color: var(--gold);
+            font-size: 1.6rem;
+            margin-bottom: 0.8rem;
+        }
+        .gift-message p {
+            font-weight: 300;
+            color: var(--text-light);
+            font-size: 1.1rem;
+        }
+        .gift-message .danger {
+            color: var(--red);
+            font-weight: 700;
+            margin-top: 1rem;
+            display: block;
+        }
+
+        /* ===== RSVP ===== */
+        .rsvp-section {
+            padding: 4rem 2rem;
+            background: var(--black);
+        }
+        .rsvp-box {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 2.5rem 2rem;
+            border: 1px solid #333;
+            background: var(--black-light);
+            text-align: center;
+        }
+        .rsvp-box h3 { color: var(--gold); font-family: 'Playfair Display', serif; font-size: 1.8rem; }
+        .rsvp-box p { color: #aaa; margin: 1rem 0; }
+        .rsvp-btn {
+            display: inline-block;
+            padding: 0.8rem 2.5rem;
+            background: var(--gold);
+            color: #000;
+            font-weight: 700;
+            text-decoration: none;
+            transition: 0.3s;
+        }
+        .rsvp-btn:hover { background: var(--gold-dark); transform: scale(1.05); }
+
+        /* ===== FOOTER ===== */
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            background: #000;
+            color: #666;
+            border-top: 1px solid #1a1a1a;
+        }
+        .footer .quote { color: var(--gold-dark); font-size: 1.1rem; }
+
+        @media (max-width: 768px) {
+            .intro-buttons { flex-direction: column; align-items: center; }
+            .btn-decision { width: 80%; }
+            .code-box ul { text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="invitation-wrapper">
+
+        <!-- ===== PANTALLA DE INTRO / DECISIÓN ===== -->
+        <div id="intro-screen">
+            <!-- Imagen de fondo (Vector John Wick) -->
+            <img src="./gift/john-perro.gif" alt="John Wick" class="intro-bg-image">
+            
+            <div class="intro-content">
+                <h1 class="intro-title">LEVEL 28</h1>
+                <p class="intro-question">
+                    Si no viniste dispuesto a matar, hoy es tu último día. ¿Lo entiendes?
+                </p>
+                <div class="intro-buttons">
+                    <button class="btn-decision btn-yes" id="btn-yes">SÍ, ESTOY LISTO</button>
+                    <button class="btn-decision btn-no" id="btn-no">NO, ME RINDO</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== PANTALLA DE MUERTE (SI DICE NO) ===== -->
+        <div id="death-screen">
+            <!-- REEMPLAZA ESTA URL CON EL GIF DE JOHN WICK MATANDO A ALGUIEN -->
+            <img src="./gift/John-wick-preparando-arma.gif" alt="John Wick Muerte" class="death-gif">
+            <h2 class="death-text">Entonces, este es tu final...</h2>
+        </div>
+
+        <!-- ===== INVITACIÓN (SI DICE SÍ) ===== -->
+        <div id="invitation-content">
+            <!-- HERO: GIF de John Wick en la ducha -->
+            <section class="hero-john">
+                <!-- REEMPLAZA ESTA URL CON TU GIF DE JOHN WICK EN LA DUCHA VOLTEÁNDOSE -->
+                <img src="./gift/John-wick-tatoo.gif" alt="John Wick Ducha" class="gif-bg">
+                <div class="hero-overlay"></div>
+
+                <div class="hero-content">
+                    <div class="hero-badge">✦ CONTINENTAL HOTEL PRESENTA ✦</div>
+                    <h1>LEVEL 28</h1>
+                    <div class="subtitle">DESBLOQUEADO</div>
+                    <div class="name">Dianny Erazo</div>
+                    <p style="margin-top:1rem; color:#ccc; max-width:500px; margin-left:auto; margin-right:auto; font-weight:300;">
+                        La acción está a punto de comenzar.<br />
+                        Que empiece la celebración.
+                    </p>
+                </div>
+            </section>
+
+            <!-- DETALLES -->
+            <section class="details-section">
+                <div class="detail-card"><span class="detail-icon"><img src="./icons/calendar.png" width="64"></span><h3>Fecha</h3><p>21 de Junio, 2026</p><p class="sub">Domingo</p></div>
+                <div class="detail-card"><span class="detail-icon"><img src="./icons/clock.png" width="64"></span><h3>Hora</h3><p>5:00 PM</p><p class="sub">(17:00 hrs)</p></div>
+                <div class="detail-card"><span class="detail-icon"><img src="./icons/map.png" width="64"></span><h3>Ubicación</h3><p></p><p class="sub"><iframe src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d3944.6573840160067!2d-70.2443697896335!3d8.62885242725185!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e0!3m2!1sen!2sve!4v1781443442267!5m2!1sen!2sve" width="200" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe></p></div>
+                <div class="detail-card"><span class="detail-icon"><img src="./icons/gun.png" width="64"></span><h3>Código de vestimenta</h3><p></p><p class="sub" style="font-style:italic;">"Solo dejen las armas en la entrada"</p></div>
+            </section>
+
+            <!-- ===== NUEVA SECCIÓN: CÓDIGO CONTINENTAL (A mi gusto) ===== -->
+            <section class="code-section">
+                <div class="code-box">
+                    <h3>⚜️ EL CÓDIGO CONTINENTAL</h3>
+                    <ul>
+                        <li><i class="fas fa-skull"></i> No se derrama sangre.</li>
+                        <li><i class="fas fa-coins"></i> Las deudas se pagan con monedas de oro.</li>
+                        <li><i class="fas fa-ban"></i> No se puede matar a un miembro del gremio.</li>
+                        <li><i class="fas fa-gavel"></i> Quien rompa las reglas, pagará las consecuencias.</li>
+                    </ul>
+                    <p class="quote">"Un asesino nunca olvida su deuda."</p>
+                </div>
+            </section>
+
+            <!-- ===== NUEVA SECCIÓN: REGALOS (Tu idea) ===== -->
+            <section class="gift-section">
+                <div class="gift-container">
+                    <!-- COLOCA TU IMAGEN DE JOHN WICK CON EL CARRO EN ./gift/john-wick-car.jpg -->
+                    <img src="./john-wick-con-perro-y-carro.jpg" alt="John Wick y su Mustang Boss 429">
+                    
+                    <div class="gift-message">
+                        <h3>⚠️ NO TE OLVIDES DE MI REGALO</h3>
+                        <p>
+                            Recuerda que el auto que quiero es el <strong>Ford Mustang Boss 429 (1969)</strong>.
+                            <br>
+                            <span class="danger">Si no traes regalo, vamos a tener problemas.</span>
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- RSVP -->
+            <section class="rsvp-section">
+                <div class="rsvp-box">
+                    <h3>✉ CONFIRMA TU ASISTENCIA</h3>
+                    <p>Fecha límite: <strong style="color:var(--gold-dark);">18 de junio 2026</strong></p>
+                    <p style="margin-bottom:1.5rem;">Responde para asegurar tu lugar para la pelea.</p>
+                    <a href="https://wa.me/+584149535521?text=Confirmo%20mi%20asistencia%20al%20cumpleaños%20de%20Dianny%20" class="rsvp-btn" target="_blank">
+                        <i class="fab fa-whatsapp"></i> Confirmar por WhatsApp
+                    </a>
+                </div>
+            </section>
+
+            <!-- FOOTER -->
+            <footer class="footer">
+                <p class="quote">“Yeah, I'm thinking I'm back... para celebrar.”</p>
+                <p style="margin-top:0.5rem; font-size:0.75rem;"> Invitacion Digital © 2026  - Invitacion de Cumpleaños  </p>
+            </footer>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // Elementos
+            const introScreen = document.getElementById('intro-screen');
+            const deathScreen = document.getElementById('death-screen');
+            const invitationContent = document.getElementById('invitation-content');
+            const btnYes = document.getElementById('btn-yes');
+            const btnNo = document.getElementById('btn-no');
+
+            // Acción SÍ
+            btnYes.addEventListener('click', function() {
+                // Ocultar pantalla de introducción
+                introScreen.classList.add('hidden');
+                
+                // Esperar a que termine la animación y mostrar la invitación
+                setTimeout(() => {
+                    introScreen.style.display = 'none';
+                    invitationContent.classList.add('active');
+                }, 800);
+            });
+
+            // Acción NO
+            btnNo.addEventListener('click', function() {
+                // Ocultar pantalla de introducción
+                introScreen.classList.add('hidden');
+                
+                // Mostrar pantalla de muerte
+                setTimeout(() => {
+                    introScreen.style.display = 'none';
+                    deathScreen.classList.add('active');
+                }, 800);
+            });
+
+            console.log('John Wick Invitation Ready - Choose wisely.');
+        })();
+    </script>
+</body>
+</html>
